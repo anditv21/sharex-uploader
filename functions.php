@@ -60,7 +60,7 @@ function GeneratePage($length, $file)
     $encEmojis = urlencode($generatedSymbols);
     $target_file = $_FILES['sharex']['name'];
     $color = rand_color();
-    $directoryPath = "media/{$generatedSymbols}";
+    $directoryPath = "$mediafolder/{$generatedSymbols}";
     mkdir($directoryPath, 0777, true);
     chmod($directoryPath, 0777);
 
