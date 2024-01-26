@@ -6,6 +6,7 @@
   <li>Extract the files and upload them to your PHP host.</li>
   <li>Customize the settings in the config.php file according to your preferences.</li>
   <li>Ensure that you set a secure value for the "main" key in the config.php file.</li>
+  <li>Add your domain and your upload key to example.sxcu<li>
   <li>Open the example.sxcu file and modify the domain in the "RequestURL" section to match your own domain.</li>
   <li>Open the main window of sharex</li>
   <li>Click on Destitations -> Custom Uploader Settings...</li>
