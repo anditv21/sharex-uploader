@@ -18,13 +18,29 @@ import (
 type TemplateData struct {
 	Color            string
 	OriginalName     string
-	FileSize         int64
+	FileSize         string
 	FileType         string
 	UploadTime       string
 	GeneratedSymbols string
 	Author           string
 	MediaFolder      string
 	SiteName         string
+}
+
+func calculateFileSize(size int64) string {
+	const (
+		_  = iota
+		KB = 1 << (10 * iota)
+		MB
+	)
+
+	switch {
+	case size >= MB:
+		return fmt.Sprintf("%.2f MB", float64(size)/float64(MB))
+	case size >= KB:
+		return fmt.Sprintf("%.2f KB", float64(size)/float64(KB))
+	}
+	return fmt.Sprintf("%d B", size)
 }
 
 func HandleUpload(config Configuration) http.HandlerFunc {
@@ -79,7 +95,7 @@ func HandleUpload(config Configuration) http.HandlerFunc {
 		templateData := TemplateData{
 			Color:            randColor(),
 			OriginalName:     header.Filename,
-			FileSize:         header.Size,
+			FileSize:         calculateFileSize(header.Size),
 			FileType:         filepath.Ext(header.Filename)[1:],
 			UploadTime:       uploadTime,
 			GeneratedSymbols: generatedSymbols,
@@ -98,7 +114,7 @@ func HandleUpload(config Configuration) http.HandlerFunc {
 		for key, value := range map[string]string{
 			"%color%":            templateData.Color,
 			"%originalName%":     templateData.OriginalName,
-			"%fileSize%":         fmt.Sprintf("%d", templateData.FileSize),
+			"%fileSize%":         templateData.FileSize,
 			"%fileType%":         templateData.FileType,
 			"%uploadTime%":       templateData.UploadTime,
 			"%generatedSymbols%": templateData.GeneratedSymbols,
@@ -115,7 +131,7 @@ func HandleUpload(config Configuration) http.HandlerFunc {
 			return
 		}
 
-		url := fmt.Sprintf("http://%s/%s/%s/", r.Host, config.MediaFolder, generatedSymbols)
+		url := fmt.Sprintf("https://%s/%s/%s/", r.Host, config.MediaFolder, generatedSymbols)
 		link := fmt.Sprintf(url)
 		fmt.Fprintf(w, link)
 	}
