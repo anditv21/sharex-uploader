@@ -1,0 +1,139 @@
+package main
+
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"math/rand"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type TemplateData struct {
+	Color            string
+	OriginalName     string
+	FileSize         int64
+	FileType         string
+	UploadTime       string
+	GeneratedSymbols string
+	Author           string
+	MediaFolder      string
+	SiteName         string
+}
+
+func HandleUpload(config Configuration) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := r.ParseMultipartForm(10 << 20) // 10 MB
+		if err != nil {
+			http.Error(w, "Unable to parse form", http.StatusBadRequest)
+			return
+		}
+
+		file, header, err := r.FormFile("sharex")
+		if err != nil {
+			http.Error(w, "Unable to get file from form", http.StatusBadRequest)
+			return
+		}
+		defer file.Close()
+
+		generatedSymbols := uuid.New().String()[:config.Length]
+		directoryPath := filepath.Join(config.MediaFolder, generatedSymbols)
+		err = os.MkdirAll(directoryPath, 0777)
+		if err != nil {
+			http.Error(w, "Unable to create directory", http.StatusInternalServerError)
+			return
+		}
+
+		err = os.Chmod(config.MediaFolder, 0777)
+		if err != nil {
+			http.Error(w, "Unable to set media folder permissions", http.StatusInternalServerError)
+			return
+		}
+
+		filePath := filepath.Join(directoryPath, "image"+filepath.Ext(header.Filename))
+		out, err := os.Create(filePath)
+		if err != nil {
+			http.Error(w, "Unable to create file", http.StatusInternalServerError)
+			return
+		}
+		defer out.Close()
+		_, err = io.Copy(out, file)
+		if err != nil {
+			http.Error(w, "Unable to save file", http.StatusInternalServerError)
+			return
+		}
+
+		err = os.Chmod(filePath, 0777)
+		if err != nil {
+			http.Error(w, "Unable to set file permissions", http.StatusInternalServerError)
+			return
+		}
+
+		uploadTime := time.Now().UTC().Add(time.Hour).Format("Monday, January 2, 2006, 15:04")
+		templateData := TemplateData{
+			Color:            randColor(),
+			OriginalName:     header.Filename,
+			FileSize:         header.Size,
+			FileType:         filepath.Ext(header.Filename)[1:],
+			UploadTime:       uploadTime,
+			GeneratedSymbols: generatedSymbols,
+			Author:           config.Author,
+			MediaFolder:      config.MediaFolder,
+			SiteName:         config.SiteName,
+		}
+
+		templateFile := getTemplateFile(templateData.FileType)
+		templateContent, err := ioutil.ReadFile(templateFile)
+		if err != nil {
+			http.Error(w, "Unable to read template file", http.StatusInternalServerError)
+			return
+		}
+
+		for key, value := range map[string]string{
+			"%color%":            templateData.Color,
+			"%originalName%":     templateData.OriginalName,
+			"%fileSize%":         fmt.Sprintf("%d", templateData.FileSize),
+			"%fileType%":         templateData.FileType,
+			"%uploadTime%":       templateData.UploadTime,
+			"%generatedSymbols%": templateData.GeneratedSymbols,
+			"%author%":           templateData.Author,
+			"%mediafolder%":      config.MediaFolder,
+			"%sitename%":         config.SiteName,
+		} {
+			templateContent = bytes.ReplaceAll(templateContent, []byte(key), []byte(value))
+		}
+
+		err = ioutil.WriteFile(filepath.Join(directoryPath, "index.html"), templateContent, 0644)
+		if err != nil {
+			http.Error(w, "Unable to write HTML template", http.StatusInternalServerError)
+			return
+		}
+
+		url := fmt.Sprintf("http://%s/%s/%s/", r.Host, config.MediaFolder, generatedSymbols)
+		link := fmt.Sprintf(url)
+		fmt.Fprintf(w, link)
+	}
+}
+
+func randColor() string {
+	return fmt.Sprintf("#%06x", rand.Intn(0xffffff))
+}
+
+func getTemplateFile(fileType string) string {
+	switch strings.ToLower(fileType) {
+	case "mp4", "webm", "ogg":
+		return "templates/template_video.html"
+	case "mov", "wmv", "avi", "avchd", "mkv":
+		return "templates/template_video_others.html"
+	case "jpeg", "png", "gif", "tiff", "jpg", "jfif":
+		return "templates/template_image.html"
+	default:
+		return "templates/template_default.html"
+	}
+}
