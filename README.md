@@ -1,3 +1,5 @@
+<h1 align="center"> simple-sharex-uploader </h1>
+<p align="center"><img src="https://i.ibb.co/8P7NCFQ/image.png"></p>
 <details>
 <summary>Setup</summary>
 <ol>
@@ -21,4 +23,14 @@
       <li>Start the service: <code>sudo systemctl start sharex-go</code></li>
     </ul>
 </ol>
+</details>
+
+
+<details>
+<summary>Click here to see a Example of a Discord Image Embed</summary>
+<img src="https://i.ibb.co/zH21Jsp/image.png">
+</details>
+<details>
+<summary>Click here to see a Example of a Discord Video Embed</summary>
+<img src="https://i.ibb.co/Xs0SkmC/image.png">
 </details>
