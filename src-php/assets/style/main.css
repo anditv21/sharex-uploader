@@ -3,7 +3,6 @@ body {
   background-size: contain;
   background-repeat: no-repeat;
   background-color: #323232;
-  overflow: hidden;
 }
 .container {
   display: flex;
@@ -67,4 +66,3 @@ a:active {
 h3, h4 {
   color: white;
 }
-
