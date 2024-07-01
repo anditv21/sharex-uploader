@@ -143,10 +143,8 @@ func randColor() string {
 
 func getTemplateFile(fileType string) string {
 	switch strings.ToLower(fileType) {
-	case "mp4", "webm", "ogg":
+	case "mp4", "webm", "ogg", "mov", "wmv", "avi", "avchd", "mkv":
 		return "templates/template_video.html"
-	case "mov", "wmv", "avi", "avchd", "mkv":
-		return "templates/template_video_others.html"
 	case "jpeg", "png", "gif", "tiff", "jpg", "jfif":
 		return "templates/template_image.html"
 	default:

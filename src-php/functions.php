@@ -11,13 +11,13 @@ function generateRandomString($length = 5) {
     }
     return $randomString;
   }
-  
+
   function rand_color()
   {
     return "#" . str_pad(dechex(mt_rand(0, 0xffffff)), 6, "0", STR_PAD_LEFT);
   }
 
-  
+
 function remove_exif($in, $out)
 {
    $buffer_len = 4096;
@@ -68,17 +68,19 @@ function GeneratePage($length, $file)
     $originalFileType = $fileType;
 
     // Select the appropriate template file based on the file type
-    if ($fileType == 'mp4' || $fileType == 'webm' || $fileType == 'ogg') {
-        $templateFile = 'templates/template_video.html';
-    } elseif (
+    if (
+        $fileType == 'mp4' ||
+        $fileType == 'webm' ||
+        $fileType == 'ogg' ||
         $fileType == 'mov' ||
         $fileType == 'wmv' ||
         $fileType == 'avi' ||
         $fileType == 'avchd' ||
-        $fileType == 'mkv'
+        $fileType == 'mkv' ||
+        $fileType == 'flv' ||
+        $fileType == 'm4v'
     ) {
-        $templateFile = 'templates/template_video_others.html';
-        $fileType = 'mp4'; // Set the file type to mp4 as html does not support playback of e.g. mov video format. $originalFileType still contains the original file type e.g. for download.
+        $templateFile = 'templates/template_video.html';
     } elseif (
         $fileType == 'jpeg' ||
         $fileType == 'png' ||
@@ -88,7 +90,7 @@ function GeneratePage($length, $file)
         $fileType == 'jfif'
     ) {
         $templateFile = 'templates/template_image.html';
-    } 
+    }
 
     // Read the template file
     $template = file_get_contents($templateFile);
