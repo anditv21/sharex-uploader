@@ -1,0 +1,11 @@
+﻿{
+  "Version": "15.0.0",
+  "DestinationType": "ImageUploader",
+  "RequestMethod": "POST",
+  "RequestURL": "https://img.anditv.it/upload.php",
+  "Body": "MultipartFormData",
+  "Arguments": {
+    "key": "test"
+  },
+  "FileFormName": "sharex"
+}

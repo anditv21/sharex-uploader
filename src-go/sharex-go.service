@@ -1,0 +1,23 @@
+  GNU nano 5.4                              /etc/systemd/system/sharex-go.service
+[Unit]
+Description=ShareX Go Server
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+ExecStart=/var/www/html/img.anditv.dev/sharex-server
+WorkingDirectory=/var/www/html/img.anditv.dev
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+
+
+
+
+
